@@ -26,6 +26,15 @@ mydlpconf_DATA = \
 	mydlp.conf \
 	denied_page.html
 
+resourcesdir = $(datadir)/mydlp/resources
+
+resources_DATA = \
+	mydlp_nlp_tr_kokler.txt
+
+sbin_SCRIPTS = \
+	mydlp-reset-db \
+	mydlp-smb-discover
+
 dist_erl_DATA = \
 	dynamic_compile.erl \
 	gen_server_cluster.erl \
@@ -34,59 +43,47 @@ dist_erl_DATA = \
 	mydlp_acl.erl \
 	mydlp_api.erl \
 	mydlp_app.erl \
+	mydlp_archive.erl \
+	mydlp_bayeserl_store.erl \
 	mydlp_container.erl \
-	mydlp_discover_fs.erl \
-	mydlp_discover_rfs.erl \
-	mydlp_discover_web.erl \
-	mydlp_discovery_manager.erl \
 	mydlp_distributor.erl \
-	mydlp_document_trainer.erl \
 	mydlp_dynamic.erl \
 	mydlp_fsm.erl \
 	mydlp_icap_fsm.erl \
-	mydlp_incident.erl \
 	mydlp_item_receive.erl \
-	mydlp_logger.erl \
-	mydlp_logger_syslog.erl \
+	mydlp_loglevel.erl \
+	mydlp_logger_h.erl \
 	mydlp_matchers.erl \
-	mydlp_mc.erl \
 	mydlp_mnesia.erl \
 	mydlp_mysql.erl \
-	mydlp_nlp.erl \
-	mydlp_ocr.erl \
-	mydlp_pdm.erl \
-	mydlp_pool.erl \
+	mydlp_nlp_tr.erl \
+	mydlp_pg_sup.erl \
 	mydlp_quarantine.erl \
 	mydlp_regex.erl \
 	mydlp_seap_fsm.erl \
+	mydlp_smb_discover.erl \
 	mydlp_smtp_fsm.erl \
 	mydlp_smtpc.erl \
 	mydlp_spool.erl \
 	mydlp_sup.erl \
 	mydlp_tc.erl \
 	mydlp_ts.erl \
+	mydlp_trainer.erl \
 	mydlp_workdir.erl \
 	mydlp_worker_sup.erl \
 	smtpc.erl \
 	smtpc_fsm.erl \
 	smtpd_cmd.erl
 
-mydlp_erl = \
-	mydlp_license.erl \
-	$(dist_erl_DATA)
-
 dist_hrl_DATA = \
 	mydlp.hrl \
-	mydlp_acl.hrl \
 	mydlp_big_binary.hrl \
 	mydlp_http.hrl \
-	mydlp_logger.hrl \
-	mydlp_macro.hrl \
 	mydlp_smtp.hrl \
 	mydlp_schema.hrl
 
 beam_DATA = \
-	$(mydlp_erl:.erl=.beam) \
+	$(dist_erl_DATA:.erl=.beam) \
 	mydlp.app
 
 boot_DATA = \
@@ -105,10 +102,6 @@ html_DATA = \
 	overview-summary.html \
 	modules-frame.html \
 	packages-frame.html
-
-mydlp_edoc = \
-	mydlp_license.html \
-	$(html_DATA)
 
 erldir = $(ERLANG_INSTALL_LIB_DIR_mydlp)/src
 hrldir = $(ERLANG_INSTALL_LIB_DIR_mydlp)/include
@@ -133,9 +126,12 @@ $(boot_DATA): $(beam_DATA)
 	@echo "Generating boot scripts..."
 	@$(ERLC) -I. $<
 
-$(mydlp_edoc): $(mydlp_erl) overview.edoc 
+$(html_DATA): $(dist_erl_DATA) overview.edoc 
 	@echo "Generating documentation..."
 	@$(ERL) -noshell -run edoc_run application mydlp '"."' '[{dir,"."}]'
+
+mydlp_nlp_tr_kokler.txt:
+	@$(WGET) http://zemberek.googlecode.com/svn/trunk/zemberek2/kaynaklar/tr/bilgi/duzyazi-kilavuz.txt -O mydlp_nlp_tr_kokler.txt
 
 check:
 	@echo "Running unit tests..."
@@ -154,5 +150,4 @@ run-production: $(beam_DATA) $(boot_DATA)
 	@MYDLP_CONF=mydlp.conf MYDLP_MNESIA_DIR=Mnesia.devel $(ERL) -pa ../thrift/gen-erl -sname console -config mydlp-sasl -boot mydlp 
 
 clean-local:
-	rm -rf $(beam_DATA) $(boot_DATA) $(mydlp_edoc) mydlp.rel overview.edoc Mnesia.*
-
+	rm -rf $(beam_DATA) $(boot_DATA) $(html_DATA) mydlp.rel overview.edoc Mnesia.*
