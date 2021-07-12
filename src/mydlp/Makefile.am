@@ -71,6 +71,10 @@ dist_erl_DATA = \
 	smtpc_fsm.erl \
 	smtpd_cmd.erl
 
+mydlp_erl = \
+	mydlp_license.erl \
+	$(dist_erl_DATA)
+
 dist_hrl_DATA = \
 	mydlp.hrl \
 	mydlp_acl.hrl \
